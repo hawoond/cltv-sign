@@ -49,10 +49,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             elevation: 0,
             scrolledUnderElevation: 1,
             automaticallyImplyLeading: false,
-            toolbarHeight: 64,
+            toolbarHeight: 56,
             title: isWide
                 ? null
-                : Text('대시보드', style: Theme.of(context).textTheme.headlineSmall),
+                : Text('대시보드', style: Theme.of(context).textTheme.titleLarge),
             actions: [
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
@@ -61,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               if (user != null)
                 Padding(
-                  padding: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.only(right: 12),
                   child: CircleAvatar(
                     radius: 16,
                     backgroundColor: AppColors.primaryLight,
@@ -83,15 +83,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildWelcomeHeader(user?.name ?? ''),
-                  const SizedBox(height: 24),
-                  _buildQuickActions(),
-                  const SizedBox(height: 32),
-                  _buildStatsGrid(stats),
-                  const SizedBox(height: 32),
+                  _buildWelcomeHeader(user?.name ?? '', isWide),
+                  SizedBox(height: isWide ? 24 : 16),
+                  _buildQuickActions(isWide),
+                  SizedBox(height: isWide ? 32 : 20),
+                  _buildStatsGrid(stats, isWide),
+                  SizedBox(height: isWide ? 32 : 20),
                   _buildUsageProgress(stats),
-                  const SizedBox(height: 32),
+                  SizedBox(height: isWide ? 32 : 20),
                   _buildRecentDocuments(docProvider),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -101,7 +102,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildWelcomeHeader(String name) {
+  Widget _buildWelcomeHeader(String name, bool isWide) {
     final hour = DateTime.now().hour;
     final greeting = hour < 12 ? '좋은 아침이에요' : hour < 18 ? '안녕하세요' : '안녕하세요';
     return Row(
@@ -112,26 +113,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Text(
                 '$greeting, $name님 👋',
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: isWide
+                    ? Theme.of(context).textTheme.headlineMedium
+                    : Theme.of(context).textTheme.titleLarge,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
               Text(
                 _formatCurrentDate(),
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
         ),
-        ElevatedButton.icon(
-          onPressed: () => context.go('/documents/new'),
-          icon: const Icon(Icons.add, size: 18),
-          label: const Text('서명 요청'),
-        ),
+        if (isWide) ...[
+          const SizedBox(width: 16),
+          ElevatedButton.icon(
+            onPressed: () => context.go('/documents/new'),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('서명 요청'),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(bool isWide) {
     final actions = [
       _QuickAction(icon: Icons.upload_file_outlined, label: '문서 업로드', color: AppColors.primary, onTap: () => context.go('/documents/new')),
       _QuickAction(icon: Icons.send_outlined, label: '서명 요청', color: AppColors.secondary, onTap: () => context.go('/documents/new')),
@@ -142,64 +152,104 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('빠른 시작', style: Theme.of(context).textTheme.titleLarge),
+        Text('빠른 시작', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
-        Row(
-          children: actions.map((a) => Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: _buildQuickActionCard(a),
-            ),
-          )).toList(),
-        ),
+        if (isWide)
+          Row(
+            children: actions.map((a) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _buildQuickActionCard(a, isWide),
+              ),
+            )).toList(),
+          )
+        else
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 2.4,
+            children: actions.map((a) => _buildQuickActionCard(a, isWide)).toList(),
+          ),
       ],
     );
   }
 
-  Widget _buildQuickActionCard(_QuickAction action) {
+  Widget _buildQuickActionCard(_QuickAction action, bool isWide) {
     return AppCard(
       onTap: action.onTap,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      child: Column(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: action.color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(action.icon, color: action.color, size: 22),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            action.label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+      padding: EdgeInsets.symmetric(
+        vertical: isWide ? 16 : 12,
+        horizontal: isWide ? 8 : 12,
       ),
+      child: isWide
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: action.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(action.icon, color: action.color, size: 22),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  action.label,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: action.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(action.icon, color: action.color, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    action.label,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildStatsGrid(Map<String, dynamic> stats) {
-    final isWide = MediaQuery.of(context).size.width >= 600;
+  Widget _buildStatsGrid(Map<String, dynamic> stats, bool isWide) {
     final statItems = [
-      _StatItem('전체 문서', '${stats['totalDocuments']}건', Icons.description_outlined, AppColors.primary, '+12%'),
-      _StatItem('진행중', '${stats['pendingDocuments']}건', Icons.pending_outlined, AppColors.accent, '+3건'),
-      _StatItem('완료', '${stats['completedDocuments']}건', Icons.task_alt_outlined, AppColors.secondary, '+5건'),
-      _StatItem('이번달 서명', '${stats['thisMonthSignatures']}건', Icons.draw_outlined, const Color(0xFF8B5CF6), '+8%'),
+      _StatItem('전체 문서', '${stats['totalDocuments'] ?? 0}건', Icons.description_outlined, AppColors.primary, '+12%'),
+      _StatItem('진행중', '${stats['pendingDocuments'] ?? 0}건', Icons.pending_outlined, AppColors.accent, '+3건'),
+      _StatItem('완료', '${stats['completedDocuments'] ?? 0}건', Icons.task_alt_outlined, AppColors.secondary, '+5건'),
+      _StatItem('이번달 서명', '${stats['thisMonthSignatures'] ?? stats['monthlySignatures'] ?? 0}건', Icons.draw_outlined, const Color(0xFF8B5CF6), '+8%'),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('현황 요약', style: Theme.of(context).textTheme.titleLarge),
+        Text('현황 요약', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         if (isWide)
           Row(
@@ -221,9 +271,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.4,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.5,
             children: statItems.map((s) => StatCard(
               label: s.label,
               value: s.value,
@@ -237,9 +287,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildUsageProgress(Map<String, dynamic> stats) {
-    final usage = stats['monthlyUsage'] as int;
-    final limit = stats['monthlyLimit'] as int;
-    final progress = usage / limit;
+    final usage = (stats['monthlyUsage'] ?? stats['usedSignatures'] ?? 47) as int;
+    final limit = (stats['monthlyLimit'] ?? stats['totalSignatures'] ?? 100) as int;
+    final progress = limit > 0 ? usage / limit : 0.0;
 
     return AppCard(
       child: Column(
@@ -248,7 +298,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('이번달 사용량', style: Theme.of(context).textTheme.titleMedium),
+              Text('이번달 사용량', style: Theme.of(context).textTheme.titleSmall),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -265,17 +315,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 '서명 요청 $usage / $limit건',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               Text(
                 '${(progress * 100).toInt()}% 사용',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: progress > 0.8 ? AppColors.danger : AppColors.textSecondary,
                 ),
               ),
@@ -287,19 +337,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
             color: progress > 0.8 ? AppColors.danger : AppColors.primary,
             height: 8,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               const Icon(Icons.info_outline, size: 14, color: AppColors.textTertiary),
               const SizedBox(width: 6),
-              Text(
-                '매월 1일 초기화됩니다.',
-                style: Theme.of(context).textTheme.bodySmall,
+              Expanded(
+                child: Text(
+                  '매월 1일 초기화됩니다.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
-              const Spacer(),
               TextButton(
                 onPressed: () {},
-                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 child: const Text('플랜 업그레이드', style: TextStyle(fontSize: 12)),
               ),
             ],

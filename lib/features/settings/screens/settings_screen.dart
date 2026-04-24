@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../data/providers/auth_provider.dart';
 
@@ -25,6 +26,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final auth = context.watch<AuthProvider>();
     final user = auth.currentUser;
 
+    final isWide = MediaQuery.of(context).size.width >= AppConstants.mobileBreakpoint;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -36,28 +39,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
             elevation: 0,
             scrolledUnderElevation: 1,
             automaticallyImplyLeading: false,
-            toolbarHeight: 64,
-            title: Text('설정', style: Theme.of(context).textTheme.headlineSmall),
+            toolbarHeight: 56,
+            title: Text('설정', style: Theme.of(context).textTheme.titleLarge),
           ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
+            child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 640),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (user != null) _buildProfileSection(user),
-                    const SizedBox(height: 24),
-                    _buildNotificationSection(),
-                    const SizedBox(height: 24),
-                    _buildPlanSection(),
-                    const SizedBox(height: 24),
-                    _buildSecuritySection(),
-                    const SizedBox(height: 24),
-                    _buildDangerZone(auth),
-                    const SizedBox(height: 40),
-                  ],
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: Padding(
+                  padding: EdgeInsets.all(isWide ? 24 : 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (user != null) _buildProfileSection(user, isWide),
+                      const SizedBox(height: 20),
+                      _buildNotificationSection(),
+                      const SizedBox(height: 20),
+                      _buildPlanSection(),
+                      const SizedBox(height: 20),
+                      _buildSecuritySection(),
+                      const SizedBox(height: 20),
+                      _buildDangerZone(auth),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -67,7 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildProfileSection(user) {
+  Widget _buildProfileSection(user, bool isWide) {
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,12 +84,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Stack(
                 children: [
                   CircleAvatar(
-                    radius: 36,
+                    radius: 32,
                     backgroundColor: AppColors.primaryLight,
                     child: Text(
                       user.initials,
                       style: const TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primary,
                       ),
@@ -94,32 +99,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     bottom: 0,
                     right: 0,
                     child: Container(
-                      width: 24,
-                      height: 24,
+                      width: 22,
+                      height: 22,
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2),
                       ),
-                      child: const Icon(Icons.camera_alt, size: 12, color: Colors.white),
+                      child: const Icon(Icons.camera_alt, size: 11, color: Colors.white),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(user.name, style: Theme.of(context).textTheme.headlineSmall),
-                    Text(user.email, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      user.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(user.email, style: Theme.of(context).textTheme.bodySmall),
                     if (user.company != null)
-                      Text(user.company!, style: Theme.of(context).textTheme.bodySmall),
+                      Text(user.company!, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textTertiary)),
                   ],
                 ),
               ),
               OutlinedButton(
                 onPressed: _showEditProfileDialog,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                ),
                 child: const Text('편집'),
               ),
             ],
