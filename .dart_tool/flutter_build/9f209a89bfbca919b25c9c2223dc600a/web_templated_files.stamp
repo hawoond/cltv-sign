@@ -1,1 +1,0 @@
-{"inputs":["/home/ubuntu/cltv_sign/web/*/index.html","/home/ubuntu/cltv_sign/web/flutter_bootstrap.js","/home/ubuntu/flutter/bin/internal/engine.version"],"outputs":["/home/ubuntu/cltv_sign/build/web/*/index.html","/home/ubuntu/cltv_sign/build/web/flutter_bootstrap.js"],"buildKey":"[{\"compileTarget\":\"dart2js\",\"renderer\":\"html\",\"mainJsPath\":\"main.dart.js\"}]"}
