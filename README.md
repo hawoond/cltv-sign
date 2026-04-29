@@ -123,18 +123,6 @@ flutter run -d ios
 
 ---
 
-## 데모 계정
-
-| 항목 | 값 |
-|------|-----|
-| 이름 | 김민준 |
-| 이메일 | demo@cltv-sign.com |
-| 비밀번호 | demo1234 |
-| 소속 | (주)클티브 |
-| 플랜 | Team |
-
----
-
 ## GitHub
 
 https://github.com/hawoond/cltv-sign
