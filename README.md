@@ -1,12 +1,9 @@
 # cltv-sign
 
-모두싸인(Modusign) 클론 전자서명 플랫폼 — Flutter 기반 웹 + 앱 멀티플랫폼 지원
-
----
 
 ## 프로젝트 개요
 
-cltv-sign은 전자서명 SaaS 서비스 모두싸인을 분석하여 Flutter로 구현한 클론 프로젝트입니다. 단일 코드베이스로 웹(브라우저), Android, iOS를 모두 지원합니다.
+cltv-sign은 전자서명 SaaS 서비스를 Flutter로 구현한 프로젝트입니다. 단일 코드베이스로 웹(브라우저), Android, iOS를 모두 지원합니다.
 
 ---
 
